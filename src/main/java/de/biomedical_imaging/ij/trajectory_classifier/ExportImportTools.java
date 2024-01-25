@@ -39,7 +39,7 @@ public class ExportImportTools {
 	public void exportTrajectoryDataAsCSV(ArrayList<? extends Trajectory> tracks, String path){
 		String[] nextLine = null;
 		try {
-			CSVWriter writer = new CSVWriter(new FileWriter(path, false), ',');
+			CSVWriter writer = new CSVWriter(new FileWriter(path, false));
 			nextLine = new String[]{"ID","X","Y","CLASS"};
 			writer.writeNext(nextLine);
 			
