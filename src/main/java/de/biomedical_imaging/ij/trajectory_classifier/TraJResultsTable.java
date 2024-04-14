@@ -191,15 +191,66 @@ public class TraJResultsTable extends ResultsTable {
 					}
 					
 				}
+			}
+		});
+
+		/*
+		 * Export MSD(s)
+		 */
+		MenuItem exportMSD = new MenuItem("Export MSD(s)");
+
+		exportMSD.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Frame f = (Frame)WindowManager.getActiveWindow();
 				
+				if (f.getComponent(0) instanceof TextPanel){
+					TextPanel p = (TextPanel)f.getComponent(0);
 				
+					int selectionStart = p.getSelectionStart();
+					int selectionEnd = p.getSelectionEnd();
+					if(selectionStart == -1 && selectionEnd == -1){
+						selectionStart = 0;
+						selectionEnd = p.getResultsTable().getCounter();
+					}
+
+					ArrayList<Trajectory> selectedTrajectories = new ArrayList<Trajectory>();
+					for( int i = selectionStart; i <= selectionEnd; i++){
+						int id = (int) table.getValue("ID", i);
+
+						ArrayList<? extends Trajectory> cTracks = null;
+						if(isParentTable){
+							cTracks = TraJClassifier_.getInstance().getParentTrajectories();
+						}else{
+							cTracks = TraJClassifier_.getInstance().getClassifiedTrajectories();
+						}
+						Trajectory t = TrajectoryUtil.getTrajectoryByID(cTracks, id);
+						selectedTrajectories.add(t);
+					}
+
+					JFileChooser chooser=new JFileChooser();
+					chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+					chooser.addChoosableFileFilter(new FileNameExtensionFilter("Comma seperated value (.csv)", "csv"));
+					chooser.setAcceptAllFileFilterUsed(false);
+					int c =chooser.showSaveDialog(null);
+					if(c == JFileChooser.APPROVE_OPTION){
+						String path=chooser.getSelectedFile().getAbsolutePath();
+						if(!path.substring(path.length()-3, path.length()).equals("csv")){
+							path += ".csv";
+						}
 				
+						ExportImportTools eit = new ExportImportTools();
+						eit.exportMSDDataAsCSV(selectedTrajectories, path);
+					}
+				}
 			}
 		});
 		
 		Menu traJ = new Menu("Trajectory classifier");
 		traJ.add(plotSelectedTrajectory);
 		traJ.add(exportTrajectories);
+		traJ.add(exportMSD);
 				//ResultsTable.getResultsWindow().getMenuBar().
 		//Hinzufügen von Export Funktionen
 		WindowManager.getFrame(windowTitle).getMenuBar().add(traJ);
